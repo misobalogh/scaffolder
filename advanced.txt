@@ -1,0 +1,9 @@
+main_dir
+ subdir
+  *.py main utils api db
+  docs/ README.md LICENSE .gitignore
+  docs/images/
+   logo.png banner.jpg
+  config/ settings.yaml
+  config/environments/
+   dev.yaml prod.yaml

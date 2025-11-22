@@ -1,0 +1,53 @@
+ifj23/
+├── src/                     # Source code
+│   ├── main.c               # Main program entry point
+│   ├── lexical/             # Lexical analysis
+│   │   ├── scanner.c        # Lexical analyzer implementation
+│   │   └── token_types.c    # Token type definitions
+│   ├── syntactic/           # Syntactic analysis
+│   │   ├── synt_recursive_parser.c    # Recursive descent parser
+│   │   ├── synt_precedence_parser.c   # Precedence parser for expressions
+│   │   ├── synt_recur_rules.c         # Recursive parser rules
+│   │   ├── synt_prec_rules.c          # Precedence parser rules
+│   │   ├── synt_prec_stack.c          # Precedence parser stack
+│   │   ├── expr.c                     # Expression handling
+│   │   └── expr_stack.c               # Expression stack operations
+│   ├── semantic/            # Semantic analysis
+│   │   └── semantic_analysis.c        # Semantic analyzer
+│   ├── codegen/             # Code generation
+│   │   └── generator.c      # Code generator
+│   └── utils/               # Utility modules
+│       ├── dynamic_string.c # Dynamic string implementation
+│       ├── substring.c      # Substring operations
+│       ├── symtable.c       # Symbol table
+│       ├── symtablestack.c  # Symbol table stack
+│       ├── function_list.c  # Function management
+│       ├── istack.c         # Integer stack
+│       └── global_variables.c # Global variables
+├── include/                 # Header files
+│   ├── scanner.h            # Lexical analyzer interface
+│   ├── token_types.h        # Token type definitions
+│   ├── synt_analysis.h      # Syntactic analysis interface
+│   ├── synt_*.h             # Various syntactic analysis headers
+│   ├── semantic_analysis.h  # Semantic analysis interface
+│   ├── generator.h          # Code generator interface
+│   ├── error_codes.h        # Error code definitions
+│   ├── macros.h             # Common macros
+│   └── *.h                  # Other utility headers
+├── tests/                   # Unit tests
+│   ├── operator_precedence_tests.c
+│   ├── synt_prec_stack_test.c
+│   └── synt_precedence_parser_test.c
+├── tests_code/              # Test Swift programs
+│   ├── example1.swift       # Basic examples
+│   ├── factorial.swift      # Factorial implementation
+│   ├── builtin.swift        # Built-in functions test
+│   └── *.swift              # Various test cases
+├── tests_integration/       # Integration tests
+├── docs/                    # Documentation
+│   ├── dokumentace.pdf      # Project documentation
+│   ├── LL_table.jpg         # LL parsing table
+│   └── *.pdf                # Additional documentation
+├── build/                   # Build artifacts (created during compilation)
+├── Makefile                 # Build configuration
+└── README.md               # This file

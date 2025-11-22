@@ -1,60 +1,110 @@
+import re
+import argparse
 from pathlib import Path
+import os
+from dataclasses import dataclass
 
-def parse_structure(file_path, output_dir='.'):
+@dataclass
+class FileSystemItem:
+    name: str
+    indent: int
+    is_dir: bool
+
+
+@dataclass
+class PathStackItem:
+    path: str
+    indent: int
+
+
+def parse_structure(file_path, output_dir="."):
     output_base = Path(output_dir)
     output_base.mkdir(parents=True, exist_ok=True)
 
-    with open(file_path, 'r') as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         lines = file.readlines()
 
     parsed_lines = []
     for line in lines:
-        stripped = line.rstrip('\n')
-        name = stripped.strip()
+        # Remove comments
+        line = line.split("#", 1)[0].rstrip()
+        if not line:
+            continue
+
+        # Calculate indent based on tree characters or whitespace
+        match = re.match(r"^[\s│├└─]*", line)
+        prefix = match.group(0)
+        indent = len(prefix)
+        name = line[len(prefix) :].strip()
+
         if not name:
-            continue  # Skip empty lines
+            continue
 
-        indent = len(stripped) - len(stripped.lstrip(' \t'))
+        # Handle *.ext syntax for multiple files
+        if name.startswith("*.") and " " in name:
+            parts = name.split()
+            ext = parts[0][1:]  # e.g. .py
+            filenames = parts[1:]
+            for fname in filenames:
+                parsed_lines.append(FileSystemItem(f"{fname}{ext}", indent, False))
+        # Handle multiple files on one line (e.g. main.py utils.py)
+        elif " " in name:
+            for fname in name.split():
 
-        parsed_lines.append({
-            'name': name,
-            'indent': indent,
-            'is_dir': name.endswith('/')
-        })
+                is_explicit_dir = fname.endswith("/")
+                clean_name = fname.rstrip("/")
+                parsed_lines.append(FileSystemItem(clean_name, indent, is_explicit_dir))
+        else:
+            is_explicit_dir = name.endswith("/")
+            clean_name = name.rstrip("/")
+            parsed_lines.append(FileSystemItem(clean_name, indent, is_explicit_dir))
 
     for i, item in enumerate(parsed_lines):
-        if i  < len(parsed_lines) - 1:
-            next_indent = parsed_lines[i + 1]['indent']
-            if next_indent > item['indent']:
-                item['is_dir'] = True
+        if i < len(parsed_lines) - 1:
+            next_indent = parsed_lines[i + 1].indent
+            if next_indent > item.indent:
+                item.is_dir = True
 
     path_stack = []
 
     for item in parsed_lines:
-        indent = item['indent']
-        name = item['name'].rstrip('/')
+        indent = item.indent
+        name = item.name
 
-        while path_stack and path_stack[-1]['indent'] >= indent:
+        while path_stack and path_stack[-1].indent >= indent:
             path_stack.pop()
 
         if path_stack:
-            full_path = output_base / path_stack[-1]['path'] / name
+            full_path = output_base / path_stack[-1].path / name
         else:
             full_path = output_base / name
 
-        if item['is_dir']:
+        if item.is_dir:
             full_path.mkdir(parents=True, exist_ok=True)
         else:
             full_path.parent.mkdir(parents=True, exist_ok=True)
             full_path.touch()
 
-        if item['is_dir']:
-            path_stack.append({'path': name if not path_stack else f"{path_stack[-1]['path']}/{name}", 'indent': indent})
+        if item.is_dir:
+            path_stack.append(
+                PathStackItem(
+                    name if not path_stack else f"{path_stack[-1].path}/{name}", indent
+                )
+            )
+
 
 def main():
-    file_path = 'example.txt'
-    output_dir = 'output'
-    parse_structure(file_path, output_dir)
+    parser = argparse.ArgumentParser(
+        description="Scaffold directory structure from text file."
+    )
+    parser.add_argument("file", help="Path to the structure file")
+    parser.add_argument(
+        "--output", "-o", default=".", help="Output directory"
+    )
+
+    args = parser.parse_args()
+    parse_structure(args.file, args.output)
+
 
 if __name__ == "__main__":
     main()
