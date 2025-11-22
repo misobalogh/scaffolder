@@ -1,7 +1,6 @@
 import re
 import argparse
 from pathlib import Path
-import os
 from dataclasses import dataclass
 
 @dataclass
@@ -20,6 +19,13 @@ class PathStackItem:
 def parse_structure(file_path, output_dir="."):
     output_base = Path(output_dir)
     output_base.mkdir(parents=True, exist_ok=True)
+
+    # List of binary file extensions to ignore
+    IGNORED_EXTENSIONS = {
+        ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".pdf", ".exe", ".zip", ".tar", ".gz",
+        ".rar", ".7z", ".mp3", ".mp4", ".avi", ".mov", ".mkv", ".flac", ".ogg", ".webp",
+        ".ico", ".svg", ".bin", ".dll"
+    }
 
     with open(file_path, "r", encoding="utf-8") as file:
         lines = file.readlines()
@@ -78,6 +84,12 @@ def parse_structure(file_path, output_dir="."):
             full_path = output_base / path_stack[-1].path / name
         else:
             full_path = output_base / name
+
+        # Check for ignored binary file extensions
+        if not item.is_dir:
+            ext = Path(name).suffix.lower()
+            if ext in IGNORED_EXTENSIONS:
+                continue
 
         if item.is_dir:
             full_path.mkdir(parents=True, exist_ok=True)
